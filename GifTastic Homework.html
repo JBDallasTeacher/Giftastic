@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GifTastic Assignment</title>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Coiny|Shadows+Into+Light" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah" rel="stylesheet">
+</head>
+
+<body>
+    <div class="panel" id="startingButtons">
+        <div class="panel-heading">
+            <h3 class="panel name">GIFtastic Assignment!</h3>
+            <p> Click on a button to see funny gifs, or add your own gifs!</p>
+        </div>
+        <div id="addButton" class="panel-body">
+        </div>
+        <p id="text">click the gif to play, pause or restart!</p>
+    </div>
+
+    <form id="gifForm">
+        <label form="gifInput">Add a button!</label>
+        <input type="text" id="gif-input">
+        <br>
+        <input id="addGif" type="submit" value="Add">
+    </form>
+
+    <div style="background:transparent" id="gifsAppearHere" class="jumbotron myJumbotron">
+    </div>
+
+    <style>
+        .panel .name {
+        font-family: 'coiny', cursive;
+        font-size: 48px;
+        color: rgb(99, 99, 230);
+        }
+
+        .panel {
+        font-size: 22px;
+        font-family: 'Shadows+Into+Light', cursive;
+        }
+
+        #addButton {
+        margin-left: auto;
+        margin-right: auto;
+        margin: 10px;
+        background-color: white;
+        }
+
+        .text {
+        margin-top: 3%;
+        }
+
+        #gifForm {
+        text-align: center;
+        }
+
+        #startingButtons {
+        margin: 5%;
+        text-align: center;
+        }
+
+        button {
+        padding: 10px;
+        color: brown;
+        border-radius: 10px;
+        }
+
+        .topic {
+        font-family: 'coiny', cursive;
+        }
+
+        form {
+        text-align: center;
+        font-family: 'coiny', cursive;
+        }
+
+        #gif-input {
+        margin: 1%;
+        }
+
+        label {
+        font-family: 'Shadows+Into+Light', cursive;
+        }
+
+        #addGif {
+        text-align: center;
+        font-family: 'Shadows+Into+Light', cursive;
+        padding: 3%;
+        border: 3px solid black;
+        border-radius: 20%;
+        background-color: green;
+        color: white;
+        }
+
+        /*gif image area and appeared gifs*/
+
+        .jumbotron {
+        background-color: transparent;
+        }
+
+        .jumbotron img {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: auto;
+        display: block;
+        }
+
+        .item p {
+        font-family: 'Shadows+Into+Light', cursive;
+        text-align: center;
+        }
+
+    </style>
+
+    <script>
+        var topics = ['soccer', 'basketball', 'beisbol', 'football'];
+
+        function showButtons() {
+            $('#addButton').empty();
+            //for loop that iterates through array and creates button
+            for (var i = 0; i < topics.length; i++) {
+                var button = $('<button>');
+                button.addClass('topic');
+                button.attr('data-name', topics[i]);
+                button.text(topics[i]);
+                $('#addButton').append(button);
+            }
+            addGif();
+        };
+
+        $('#addGif').on('click', function () {
+            var userInput = $('#gif-input').val().trim();
+            //console.log($('#gif-input'));
+            topics.push(userInput);
+            showButtons();
+            return false;
+
+            if (userInput === ' ') {
+                $('#gif-input').val().trim();
+            }
+        });
+        showButtons();
+
+        function addGif() {
+            $('button').on('click', function () {
+                var sport = $(this).data('name');
+                var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                    sport + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+                $.ajax({ url: queryURL, method: 'GET' })
+                    .done(function (response) {
+                        var results = response.data;
+                        //console.log(response);
+
+                        for (var i = 0; i < results.length; i++) {
+                            var gifDiv = $('<div class="item">');
+                            var rating = results[i].rating;
+                            var p = $('<p>').text("Rating: " + rating);
+                            var giphyImage = $('<img>');
+
+                            giphyImage.attr('src', results[i].images.fixed_height_still.url);
+                            giphyImage.attr('data-still', results[i].images.fixed_height_still.url);
+                            giphyImage.attr('data-animate', results[i].images.fixed_height.url);
+                            giphyImage.attr('data-state', results[i].images.fixed_height_still.url);
+
+                            gifDiv.append(giphyImage)
+                            gifDiv.append(p)
+                            $('#gifsAppearHere').prepend(gifDiv);
+
+                        }
+
+                        $('.item').children('img').on('click', function () {
+                            var state = $(this).attr('data-state');
+
+                            if (state == 'still') {
+                                $(this).attr('src', $(this).data('animate'));
+                                $(this).attr('data-state', 'animate');
+                            } else {
+                                $(this).attr('src', $(this).data('still'));
+                                $(this).attr('data-state', 'still');
+                            }
+
+                        });
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>
